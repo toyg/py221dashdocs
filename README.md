@@ -20,7 +20,7 @@ HOWTO
 2. unzip it in py221dashdocs/python221.docset/Contents/Resources
 3. rename the resulting directory "html-2.2.1" to "Documents"
 4. `python mkdash.py`
-5. open Dash and point it to python221.docset
+5. launch Dash, go to `Dash -> Preferences... -> Docsets`, click `+` and point to python221.docset
 
 Feedback
 --------
