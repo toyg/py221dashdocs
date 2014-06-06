@@ -22,6 +22,9 @@ HOWTO
 4. `python mkdash.py`
 5. launch Dash, go to `Dash -> Preferences... -> Docsets`, click `+` and point to python221.docset
 
+If you want to package the result:
+    `tar --exclude='.DS_Store' -cvzf python221.tgz python221.docset`
+
 Feedback
 --------
 
