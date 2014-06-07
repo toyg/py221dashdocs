@@ -4,7 +4,11 @@ Python 2.2.1 documentation in Dash format
 The Jython implementation shipped with WebLogic and WebSphere is stuck at 2.2.1, so 
 if you have to work with it, it's nice to have this particular documentation in Dash.
 
-This script will do most of the work for you.
+This script will download and repackage the docs as necessary.
+
+If you trust me enough to accept automatic updates instead, just click on 
+[this link](dash-feed://https%3A%2F%2Fraw.githubusercontent.com%2Ftoyg%2Fpy221dashdocs%2Fmaster%2Ffeed.xml) 
+to add my Python 2.2.1 feed to your Dash.
 
 Requirements
 ------------
@@ -16,14 +20,8 @@ Requirements
 HOWTO
 -----
 
-1. Download the original HTML docs from https://www.python.org/ftp/python/doc/2.2.1/
-2. unzip it in py221dashdocs/python221.docset/Contents/Resources
-3. rename the resulting directory "html-2.2.1" to "Documents"
-4. `python mkdash.py`
-5. launch Dash, go to `Dash -> Preferences... -> Docsets`, click `+` and point to python221.docset
-
-If you want to package the result:
-    `tar --exclude='.DS_Store' -cvzf python221.tgz python221.docset`
+1. `python mkdash.py`
+2. launch Dash, go to `Dash -> Preferences... -> Docsets`, click `+` and point to python221.docset
 
 Feedback
 --------
