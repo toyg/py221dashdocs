@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Giacomo Lacava'
 
-import sqlite3
+from genericpath import exists
+from urllib.request import urlretrieve
+from zipfile import ZipFile
+import os, sqlite3
 from os.path import join, dirname
+
 from bs4 import BeautifulSoup as BS
 
 PKGPATH = 'python221.docset/Contents/Resources'
@@ -10,6 +14,40 @@ PKGPATH = 'python221.docset/Contents/Resources'
 DBPATH = join(PKGPATH, 'docSet.dsidx')
 
 DOCPATH = join(PKGPATH, 'Documents')
+
+DOCURL = "https://www.python.org/ftp/python/doc/2.2.1/html-2.2.1.zip"
+
+
+def make_plist():
+    if not exists(PKGPATH):
+        os.makedirs(PKGPATH)
+    plist = """<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>dashIndexFilePath</key>
+	<string>index.html</string>
+	<key>CFBundleIdentifier</key>
+	<string>python221</string>
+	<key>CFBundleName</key>
+	<string>Python 2.2.1</string>
+	<key>DocSetPlatformFamily</key>
+	<string>python</string>
+	<key>isDashDocset</key>
+	<true/>
+</dict>
+</plist>"""
+    with open(join(dirname(PKGPATH), 'Info.plist'), 'w', encoding='utf-8') as infofile:
+        infofile.write(plist)
+
+
+def retrieve_docs():
+    if not exists(PKGPATH):
+        os.makedirs(PKGPATH)
+    filepath, headers = urlretrieve(DOCURL, "html-2.2.1.zip")
+    with ZipFile(filepath, 'r') as zf:
+        zf.extractall(join(PKGPATH, 'Documents'))
+    os.unlink(filepath)
 
 
 def parsePage(pagePath, recordList):
@@ -36,9 +74,9 @@ def parsePage(pagePath, recordList):
             parsePage(join(topDir, a.attrs['href']), recordList)
 
 
-def parseModules(docPath):
+def parseModules():
 
-    modIndex = join(docPath, 'modindex.html')
+    modIndex = join(DOCPATH, 'modindex.html')
     soup = None
     records = []
     with open(modIndex, 'r', encoding='iso-8859-1') as mf:
@@ -46,15 +84,15 @@ def parseModules(docPath):
 
     tts = soup.find_all('tt')
     for tt in tts:
-        module = tt.text
         path = tt.parent.attrs['href']
-        #records.append((module, 'Module', path))
         parsePage(path, records)
 
     return records
 
 
 def generate():
+    retrieve_docs()
+    make_plist()
 
     db = sqlite3.connect(DBPATH)
     cursor = db.cursor()
@@ -68,7 +106,7 @@ def generate():
     cursor.execute('CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);')
 
     # populate
-    records = parseModules(DOCPATH)
+    records = parseModules()
     cursor.executemany('INSERT OR IGNORE INTO searchIndex(name, type, path) VALUES (?,?,?)', records)
 
     # For various reasons, a lot of entries with "#SECTION..." are duplicated, but not all.
